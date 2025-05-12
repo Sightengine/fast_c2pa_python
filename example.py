@@ -54,5 +54,5 @@ def benchmark_c2pa_read(image_path, iterations=200):
     
 if __name__ == "__main__":
     # Replace with your image path
-    image_path = "/home/dienhoa/Downloads/Firefly  Close-up portrait of a woman with serene expression, soft curls pinned back, wearing a vint.jpg"
+    image_path = "./tests/test_images/adobe_firefly_image.jpg"
     benchmark_c2pa_read(image_path) 

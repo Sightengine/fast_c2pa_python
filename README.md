@@ -93,6 +93,35 @@ Run all tests:
 python run_tests.py 
 ```
 
+## Development
+
+This library is built using [Maturin](https://github.com/PyO3/maturin), which provides Python bindings for Rust with [PyO3](https://github.com/PyO3/pyo3).
+
+### Setting Up Development Environment
+
+```bash
+# Install Maturin
+pip install maturin
+
+# Development build (debug mode)
+maturin develop
+
+# Run in release mode for better performance
+maturin develop --release
+```
+
+### Building Wheel Files
+
+```bash
+# Build wheel for the current platform
+maturin build --release
+
+Wheel files are generated in the `target/wheels/` directory and can be shared directly with users who can install them using pip:
+
+```bash
+pip install /path/to/fast_c2pa_reader-x.x.x-cp3xx-cp3xx-platform.whl
+```
+
 ## License
 
 MIT 

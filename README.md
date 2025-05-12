@@ -57,15 +57,6 @@ with open("path/to/image.jpg", "rb") as f:
     metadata = read_c2pa_from_bytes(data, "image/jpeg")
 ```
 
-### MIME Type Detection
-
-```python
-from fast_c2pa_reader import get_mime_type
-
-# Get the MIME type of a file based on its extension
-mime_type = get_mime_type("path/to/image.jpg")  # Returns "image/jpeg"
-```
-
 ### Example Output
 
 ```python

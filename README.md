@@ -6,6 +6,8 @@ A high-performance Python library for reading C2PA metadata.
 
 This library provides extremely fast C2PA metadata extraction from digital assets using direct PyO3 bindings to the Rust C2PA implementation. It was created to address performance bottlenecks in existing Python C2PA libraries.
 
+> **Note:** This library is designed for reading C2PA metadata only. It does not support writing or creating C2PA metadata at this time.
+
 ## Benchmarks
 
 | Implementation | Average Read Time |
@@ -17,7 +19,7 @@ This library provides extremely fast C2PA metadata extraction from digital asset
 
 ## Features
 
-- **Extreme Performance**: 100x faster than the official c2pa-python library
+- **Extreme Performance**: Much faster than c2pa-python and approaching native Rust performance
 
 ## Installation
 

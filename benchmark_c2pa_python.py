@@ -1,10 +1,13 @@
+
+### Install c2pa-python library to run this benchmark
 import time
 import statistics
 import json
-import fast_c2pa_reader
+from io import BytesIO
+from c2pa import Reader
 
-def benchmark_c2pa_read(image_path, iterations=200):
-    print(f"\nRunning FAST C2PA reading benchmark over {iterations} iterations...")
+def benchmark_c2pa_python(image_path, iterations=200):
+    print(f"\nRunning c2pa-python reading benchmark over {iterations} iterations...")
     print(f"File: {image_path}")
     
     # Read file into memory once
@@ -13,8 +16,11 @@ def benchmark_c2pa_read(image_path, iterations=200):
         data = f.read()
     print(f"File read complete. Size: {len(data)} bytes")
     
-    # First run to show the metadata using full version
-    result = fast_c2pa_reader.read_c2pa_from_bytes(data, "image/jpeg", allow_threads=True)
+    # First run to show the metadata
+    stream = BytesIO(data)
+    reader = Reader("image/jpeg", stream)
+    result = reader.get_active_manifest()
+    
     if result:
         print("\nC2PA Data Found (full data):")
         print(f"  Title: {result.get('title')}")
@@ -29,17 +35,18 @@ def benchmark_c2pa_read(image_path, iterations=200):
     else:
         print("No C2PA metadata found in the image")
     
-    # Benchmark runs for original version
+    # Benchmark runs
     print("\nBenchmarking full version:")
     times_full = []
     for i in range(iterations):
+        stream = BytesIO(data)
         start_time = time.perf_counter()
-        fast_c2pa_reader.read_c2pa_from_bytes(data, "image/jpeg", allow_threads=True)
+        reader = Reader("image/jpeg", stream)
         duration = (time.perf_counter() - start_time) * 1000  # Convert to milliseconds
         times_full.append(duration)
         print(f"Iteration {i + 1}: {duration:.3f}ms")
     
-    # Calculate statistics for full version
+    # Calculate statistics
     avg_time_full = statistics.mean(times_full)
     std_dev_full = statistics.stdev(times_full) if len(times_full) > 1 else 0
     min_time_full = min(times_full)
@@ -53,6 +60,6 @@ def benchmark_c2pa_read(image_path, iterations=200):
     print(f"  Max time: {max_time_full:.3f}ms")
     
 if __name__ == "__main__":
-    # Replace with your image path
+    # Use the same test image as in the fast_c2pa_reader benchmark
     image_path = "./tests/test_images/adobe_firefly_image.jpg"
-    benchmark_c2pa_read(image_path) 
+    benchmark_c2pa_python(image_path, 10) 

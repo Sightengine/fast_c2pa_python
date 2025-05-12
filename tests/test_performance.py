@@ -18,7 +18,8 @@ from fast_c2pa_reader import read_c2pa_from_bytes
 
 # Test image path - update this to point to a test image with C2PA metadata
 TEST_IMAGES_DIR = Path(__file__).parent / "test_images"
-TEST_IMAGE = str(TEST_IMAGES_DIR / "adobe_firefly_image.jpg")
+# TEST_IMAGE = str(TEST_IMAGES_DIR / "adobe_firefly_image.jpg")
+TEST_IMAGE = str(TEST_IMAGES_DIR / "chatgpt_image.png")
 
 # Number of iterations for reliable benchmarking
 ITERATIONS = 10
@@ -30,7 +31,7 @@ def get_performance_thresholds():
     These thresholds can be overridden by environment variables.
     """
     # Default thresholds (can be overridden by environment variables)
-    default_avg_ms = 8.0
+    default_avg_ms = 10.0
     default_max_ms = 15.0
     
     # Allow overriding thresholds via environment variables

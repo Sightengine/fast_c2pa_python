@@ -13,7 +13,7 @@ This library provides extremely fast C2PA metadata extraction from digital asset
 | Implementation | Average Read Time |
 | -------------- | ---------------- |
 | c2pa-python (UniFFI) | ~486ms |
-| numbers-c2pa (subprocess) | ~17ms |
+| numbers-c2pa | ~17ms |
 | fast_c2pa_reader (PyO3) | ~8ms |
 | Native Rust | ~7ms |
 

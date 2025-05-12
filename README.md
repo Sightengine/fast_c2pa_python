@@ -17,10 +17,6 @@ This library provides extremely fast C2PA metadata extraction from digital asset
 | fast_c2pa_reader (PyO3) | ~8ms |
 | Native Rust | ~7ms |
 
-## Features
-
-- **Extreme Performance**: Much faster than c2pa-python and approaching native Rust performance
-
 ## Installation
 
 ```bash

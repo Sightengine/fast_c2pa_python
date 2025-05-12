@@ -14,7 +14,7 @@ import platform
 import mimetypes
 from pathlib import Path
 
-from fast_c2pa_reader import read_c2pa_from_bytes
+from fast_c2pa_reader import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
 
 # Test image path - update this to point to a test image with C2PA metadata
 TEST_IMAGES_DIR = Path(__file__).parent / "test_images"
@@ -46,38 +46,6 @@ def get_performance_thresholds():
         "max_threshold": max_threshold,
         "skip_tests": skip_perf_tests
     }
-
-def get_mime_type(file_path):
-    """
-    Determine MIME type from file extension.
-    
-    Args:
-        file_path: Path to the file
-        
-    Returns:
-        str: MIME type or None if it cannot be determined
-    """
-    # Initialize mimetypes if needed
-    if not mimetypes.inited:
-        mimetypes.init()
-    
-    mime_type, _ = mimetypes.guess_type(file_path)
-    
-    # Fallbacks for common image types if mime_type is None
-    if mime_type is None:
-        ext = os.path.splitext(file_path)[1].lower()
-        mime_map = {
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.png': 'image/png',
-            '.gif': 'image/gif',
-            '.webp': 'image/webp',
-            '.tiff': 'image/tiff',
-            '.heic': 'image/heic',
-        }
-        mime_type = mime_map.get(ext)
-    
-    return mime_type
 
 @pytest.fixture(scope="session")
 def setup_test_image_bytes():

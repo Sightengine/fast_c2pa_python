@@ -12,45 +12,13 @@ import mimetypes
 from pathlib import Path
 
 # Import the implementation
-from fast_c2pa_reader import read_c2pa_from_bytes
+from fast_c2pa_reader import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
 
 # Test image path - update this to point to a test image with C2PA metadata
 TEST_IMAGES_DIR = Path(__file__).parent / "test_images"
 # TEST_IMAGE = str(TEST_IMAGES_DIR / "adobe_firefly_image.jpg")
 TEST_IMAGE = str(TEST_IMAGES_DIR / "chatgpt_image.png")
 TEST_IMAGE_NOT_C2PA = str(TEST_IMAGES_DIR / "screenshot_noc2pa.png")
-
-def get_mime_type(file_path):
-    """
-    Determine MIME type from file extension.
-    
-    Args:
-        file_path: Path to the file
-        
-    Returns:
-        str: MIME type or None if it cannot be determined
-    """
-    # Initialize mimetypes if needed
-    if not mimetypes.inited:
-        mimetypes.init()
-    
-    mime_type, _ = mimetypes.guess_type(file_path)
-    
-    # Fallbacks for common image types if mime_type is None
-    if mime_type is None:
-        ext = os.path.splitext(file_path)[1].lower()
-        mime_map = {
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.png': 'image/png',
-            '.gif': 'image/gif',
-            '.webp': 'image/webp',
-            '.tiff': 'image/tiff',
-            '.heic': 'image/heic',
-        }
-        mime_type = mime_map.get(ext)
-    
-    return mime_type
 
 @pytest.fixture(scope="session")
 def setup_test_image_bytes():
@@ -146,4 +114,106 @@ def test_thread_safety():
     assert type(result_threaded) == type(result_unthreaded)
     if result_threaded is not None and result_unthreaded is not None:
         # Both should contain the same keys if they returned data
-        assert result_threaded.keys() == result_unthreaded.keys() 
+        assert result_threaded.keys() == result_unthreaded.keys()
+
+def test_get_mime_type():
+    """Test the get_mime_type function."""
+    # Test with common image types
+    assert get_mime_type(TEST_IMAGE) == "image/png"
+    assert get_mime_type(TEST_IMAGE_NOT_C2PA) == "image/png"
+    
+    # Test with fabricated file paths for common types
+    assert get_mime_type("test.jpg") == "image/jpeg"
+    assert get_mime_type("test.jpeg") == "image/jpeg"
+    assert get_mime_type("test.png") == "image/png"
+    assert get_mime_type("test.gif") == "image/gif"
+    assert get_mime_type("test.webp") == "image/webp"
+    
+    # Test with unknown extension
+    unknown_mime = get_mime_type("test.unknown")
+    assert unknown_mime is None or isinstance(unknown_mime, str)
+
+def test_read_c2pa_from_file_with_explicit_mime():
+    """Test reading C2PA metadata from file with explicit MIME type."""
+    if not os.path.exists(TEST_IMAGE):
+        pytest.skip(f"Test image not found: {TEST_IMAGE}")
+    
+    # Get MIME type
+    mime_type = get_mime_type(TEST_IMAGE)
+    if not mime_type:
+        pytest.skip(f"Could not determine MIME type for {TEST_IMAGE}")
+    
+    # Read metadata with explicit MIME type
+    metadata = read_c2pa_from_file(TEST_IMAGE, mime_type)
+    
+    # Basic validation
+    assert metadata is not None
+    assert "title" in metadata or "generator" in metadata or "claim_generator" in metadata
+    
+    # Verify signature info exists if the file has valid C2PA data
+    if "signature_info" in metadata:
+        assert "issuer" in metadata["signature_info"]
+
+def test_read_c2pa_from_file_with_auto_mime():
+    """Test reading C2PA metadata from file with automatic MIME type detection."""
+    if not os.path.exists(TEST_IMAGE):
+        pytest.skip(f"Test image not found: {TEST_IMAGE}")
+    
+    # Read metadata with automatic MIME type detection
+    metadata = read_c2pa_from_file(TEST_IMAGE)
+    
+    # Basic validation
+    assert metadata is not None
+    assert "title" in metadata or "generator" in metadata or "claim_generator" in metadata
+    
+    # Verify signature info exists if the file has valid C2PA data
+    if "signature_info" in metadata:
+        assert "issuer" in metadata["signature_info"]
+
+def test_read_c2pa_from_file_no_c2pa():
+    """Test with file that has no C2PA metadata."""
+    if not os.path.exists(TEST_IMAGE_NOT_C2PA):
+        pytest.skip(f"Test image without C2PA not found: {TEST_IMAGE_NOT_C2PA}")
+    
+    # Should not raise exception but return None
+    result = read_c2pa_from_file(TEST_IMAGE_NOT_C2PA)
+    assert result is None
+
+def test_read_c2pa_from_file_thread_safety():
+    """Test thread safety option for read_c2pa_from_file."""
+    if not os.path.exists(TEST_IMAGE):
+        pytest.skip(f"Test image not found: {TEST_IMAGE}")
+    
+    # Test with allow_threads=True (default)
+    result_threaded = read_c2pa_from_file(TEST_IMAGE, allow_threads=True)
+    
+    # Test with allow_threads=False
+    result_unthreaded = read_c2pa_from_file(TEST_IMAGE, allow_threads=False)
+    
+    # Results should be the same
+    assert type(result_threaded) == type(result_unthreaded)
+    if result_threaded is not None and result_unthreaded is not None:
+        # Both should contain the same keys if they returned data
+        assert result_threaded.keys() == result_unthreaded.keys()
+
+def test_read_c2pa_from_file_invalid_path():
+    """Test error handling with invalid file path."""
+    # Test with invalid file path
+    with pytest.raises(Exception):
+        read_c2pa_from_file("nonexistent_file.jpg")
+
+def test_read_c2pa_from_file_empty_mime():
+    """Test with empty MIME type (should use auto-detection)."""
+    if not os.path.exists(TEST_IMAGE):
+        pytest.skip(f"Test image not found: {TEST_IMAGE}")
+    
+    # Read with empty MIME type string
+    result_empty = read_c2pa_from_file(TEST_IMAGE, "")
+    
+    # Read with automatic MIME type
+    result_auto = read_c2pa_from_file(TEST_IMAGE)
+    
+    # Both should work the same
+    assert type(result_empty) == type(result_auto)
+    if result_empty is not None and result_auto is not None:
+        assert result_empty.keys() == result_auto.keys() 

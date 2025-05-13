@@ -1,9 +1,8 @@
 """
 Performance benchmark tests for fast_c2pa_reader.
 
-These tests verify that our implementation maintains its expected performance
-characteristics, focusing on relative performance and avoiding hard-coded thresholds
-that depend on specific hardware.
+These tests verify that our implementation is at least 30x faster than c2pa-python,
+focusing on relative performance rather than absolute time measurements.
 """
 
 import os
@@ -13,8 +12,12 @@ import statistics
 import platform
 import mimetypes
 from pathlib import Path
+from io import BytesIO
 
 from fast_c2pa_reader import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
+
+# Import c2pa-python for comparison
+from c2pa import Reader
 
 # Test image path - update this to point to a test image with C2PA metadata
 TEST_IMAGES_DIR = Path(__file__).parent / "test_images"
@@ -24,26 +27,23 @@ TEST_IMAGE = str(TEST_IMAGES_DIR / "chatgpt_image.png")
 # Number of iterations for reliable benchmarking
 ITERATIONS = 10
 
-# Environment-aware thresholds
-def get_performance_thresholds():
+# Environment-aware settings
+def get_performance_settings():
     """
-    Return performance thresholds based on the current environment.
-    These thresholds can be overridden by environment variables.
+    Return performance settings based on the current environment.
+    These settings can be overridden by environment variables.
     """
-    # Default thresholds (can be overridden by environment variables)
-    default_avg_ms = 10.0
-    default_max_ms = 15.0
+    # Default minimum speedup factor (can be overridden)
+    default_speedup_factor = 30.0
     
     # Allow overriding thresholds via environment variables
-    avg_threshold = float(os.environ.get("FAST_C2PA_MAX_AVG_TIME_MS", default_avg_ms))
-    max_threshold = float(os.environ.get("FAST_C2PA_MAX_SINGLE_TIME_MS", default_max_ms))
+    speedup_factor = float(os.environ.get("FAST_C2PA_MIN_SPEEDUP_FACTOR", default_speedup_factor))
     
     # Skip tests if environment variable is set
     skip_perf_tests = os.environ.get("SKIP_PERFORMANCE_TESTS", "").lower() in ("1", "true", "yes")
     
     return {
-        "avg_threshold": avg_threshold,
-        "max_threshold": max_threshold,
+        "speedup_factor": speedup_factor,
         "skip_tests": skip_perf_tests
     }
 
@@ -60,10 +60,10 @@ def setup_test_image_bytes():
     
     return image_bytes, get_mime_type(TEST_IMAGE)
 
-def test_performance_bytes(setup_test_image_bytes):
-    """Test performance of C2PA reading from bytes."""
-    thresholds = get_performance_thresholds()
-    if thresholds["skip_tests"]:
+def test_compare_performance(setup_test_image_bytes):
+    """Test performance of fast_c2pa_reader vs c2pa-python."""
+    settings = get_performance_settings()
+    if settings["skip_tests"]:
         pytest.skip("Performance tests skipped via environment variable")
 
     image_bytes, mime_type = setup_test_image_bytes
@@ -71,24 +71,42 @@ def test_performance_bytes(setup_test_image_bytes):
     if not mime_type:
         pytest.skip(f"Could not determine MIME type for {TEST_IMAGE}")
     
-    times = []
+    # Test fast_c2pa_reader performance
+    fast_c2pa_times = []
     for _ in range(ITERATIONS):
         start_time = time.time()
         read_c2pa_from_bytes(image_bytes, mime_type, allow_threads=True)
         end_time = time.time()
         elapsed_ms = (end_time - start_time) * 1000
-        times.append(elapsed_ms)
+        fast_c2pa_times.append(elapsed_ms)
     
-    avg_time = statistics.mean(times)
-    max_time = max(times)
+    fast_c2pa_avg = statistics.mean(fast_c2pa_times)
     
-    print(f"\nPerformance results:")
-    print(f"  Average time: {avg_time:.2f}ms")
-    print(f"  Maximum time: {max_time:.2f}ms")
-    print(f"  All times: {[f'{t:.2f}' for t in times]}")
+    # Test c2pa-python performance
+    c2pa_python_times = []
+    for _ in range(ITERATIONS):
+        stream = BytesIO(image_bytes)
+        start_time = time.time()
+        reader = Reader(mime_type, stream)
+        end_time = time.time()
+        elapsed_ms = (end_time - start_time) * 1000
+        c2pa_python_times.append(elapsed_ms)
+    
+    c2pa_python_avg = statistics.mean(c2pa_python_times)
+    
+    # Calculate speedup factor
+    speedup = c2pa_python_avg / fast_c2pa_avg
+    
+    print(f"\nPerformance comparison results:")
+    print(f"  fast_c2pa_reader average time: {fast_c2pa_avg:.2f}ms")
+    print(f"  c2pa-python average time: {c2pa_python_avg:.2f}ms")
+    print(f"  Speedup factor: {speedup:.2f}x")
+    print(f"  Required minimum speedup: {settings['speedup_factor']}x")
     print(f"  System: {platform.system()} {platform.version()}")
     print(f"  MIME type: {mime_type}")
     
-    # Use environment-aware thresholds for assertions
-    assert avg_time < thresholds["avg_threshold"], f"Average time ({avg_time:.2f}ms) exceeds maximum ({thresholds['avg_threshold']}ms)"
-    assert max_time < thresholds["max_threshold"], f"Maximum time ({max_time:.2f}ms) exceeds threshold ({thresholds['max_threshold']}ms)"
+    # Check if our library is at least N times faster
+    assert speedup >= settings["speedup_factor"], (
+        f"fast_c2pa_reader is only {speedup:.2f}x faster than c2pa-python, "
+        f"but at least {settings['speedup_factor']}x speedup is required"
+    )

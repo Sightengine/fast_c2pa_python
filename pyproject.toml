@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fast_c2pa_reader"
+version = "0.1.0"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Rust",

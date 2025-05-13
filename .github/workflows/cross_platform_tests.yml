@@ -47,15 +47,19 @@ jobs:
       run: pip install c2pa-python
       continue-on-error: true  # Continue even if c2pa-python install fails
       
-    - name: Build package with maturin (development mode)
+    - name: Create virtual environment
+      run: |
+        python -m venv .venv
+        echo "VIRTUAL_ENV=$PWD/.venv" >> $GITHUB_ENV
+        echo "$PWD/.venv/bin" >> $GITHUB_PATH
+        
+    - name: Build and install package with maturin
       uses: PyO3/maturin-action@v1
       with:
         target: x86_64
         command: develop
         args: --release
         sccache: 'true'
-        python-version: ${{ matrix.python-version }}
-        working-directory: .
       
     - name: Run tests
       run: python run_tests.py
@@ -68,8 +72,6 @@ jobs:
         command: build
         args: --release
         sccache: 'true'
-        python-version: ${{ matrix.python-version }}
-        working-directory: .
         
     - name: Upload wheels
       uses: actions/upload-artifact@v4

@@ -1,0 +1,80 @@
+name: Cross-Platform Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build_and_test:
+    name: Build and test on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false  # Continue with other jobs if one fails
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install maturin>=1.8.3 pytest pytest-benchmark
+        if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+      shell: bash
+      
+    - name: Install c2pa-python for benchmarking
+      run: pip install c2pa-python
+      continue-on-error: true  # Continue even if c2pa-python install fails
+      
+    - name: Build library (development mode)
+      run: maturin develop --release
+      
+    - name: Run tests
+      run: python run_tests.py
+      continue-on-error: true  # Continue even if tests fail to get wheels
+      
+    - name: Build wheel
+      run: maturin build --release
+        
+    - name: Upload wheels
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: target/wheels/
+        
+  # Create a release job that collects all wheels
+  collect_wheels:
+    name: Collect all wheels
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: wheels
+        
+    - name: Display wheel files
+      run: find wheels -type f -name "*.whl" | sort
+      shell: bash
+        
+    - name: Upload combined wheels
+      uses: actions/upload-artifact@v3
+      with:
+        name: all-wheels
+        path: wheels/*/*.whl 

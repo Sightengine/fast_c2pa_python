@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false  # Continue with other jobs if one fails
       matrix:
-        python-version: ['3.10']
+        python-version: ['3.11']
 
     steps:
     - uses: actions/checkout@v4
@@ -36,6 +36,27 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+
+    # Cache Python packages
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+      
+    # Cache Rust dependencies
+    - name: Cache Cargo registry and index
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
       
     - name: Create virtual environment
       run: |

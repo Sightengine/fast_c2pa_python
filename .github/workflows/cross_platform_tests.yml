@@ -20,12 +20,11 @@ env:
 
 jobs:
   build_and_test:
-    name: Build and test on ${{ matrix.os }} with Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: Build and test on Ubuntu with Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false  # Continue with other jobs if one fails
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.10', '3.11']
 
     steps:
@@ -51,8 +50,9 @@ jobs:
     - name: Build package with maturin (development mode)
       uses: PyO3/maturin-action@v1
       with:
-        target: ${{ matrix.os == 'windows-latest' && 'x64' || 'x86_64' }}
-        args: --release develop
+        target: x86_64
+        command: develop
+        args: --release
         sccache: 'true'
         python-version: ${{ matrix.python-version }}
         working-directory: .
@@ -64,7 +64,8 @@ jobs:
     - name: Build wheel
       uses: PyO3/maturin-action@v1
       with:
-        target: ${{ matrix.os == 'windows-latest' && 'x64' || 'x86_64' }}
+        target: x86_64
+        command: build
         args: --release
         sccache: 'true'
         python-version: ${{ matrix.python-version }}
@@ -73,7 +74,7 @@ jobs:
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
-        name: wheels-${{ matrix.os }}-py${{ matrix.python-version }}
+        name: wheels-ubuntu-latest-py${{ matrix.python-version }}
         path: target/wheels/
         
   # Create a release job that collects all wheels

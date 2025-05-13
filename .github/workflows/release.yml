@@ -5,6 +5,12 @@ on:
     tags:
       - 'v*'  # Run when a tag starting with 'v' is pushed
 
+# Disable notifications
+env:
+  GITHUB_ACTIONS_SKIP_NOTIFICATIONS: true
+  ACTIONS_STEP_DEBUG: false
+  GITHUB_ACTIONS_NOTIFICATIONS: false
+
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -14,28 +20,19 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.10', '3.11']
-        # Add specific exclusions here if needed
-        # exclude:
-        #   - os: macos-latest
-        #     python-version: '3.12'
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        
       - name: Build wheels
-        run: |
-          pip install maturin>=1.8.3
-          maturin build --release --strip
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.os == 'windows-latest' && 'x64' || 'x86_64' }}
+          args: --release --strip
+          sccache: 'true'
+          python-version: ${{ matrix.python-version }}
           
       - name: Upload wheels
         uses: actions/upload-artifact@v4

@@ -34,7 +34,7 @@ def get_performance_settings():
     These settings can be overridden by environment variables.
     """
     # Default minimum speedup factor (can be overridden)
-    default_speedup_factor = 30.0
+    default_speedup_factor = 20.0
     
     # Allow overriding thresholds via environment variables
     speedup_factor = float(os.environ.get("FAST_C2PA_MIN_SPEEDUP_FACTOR", default_speedup_factor))

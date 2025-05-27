@@ -78,7 +78,6 @@ jobs:
     - name: Build and install package with maturin
       uses: PyO3/maturin-action@v1
       with:
-        python-interpreter: ${{ steps.setup_python.outputs.python-path }}
         target: x86_64
         command: develop
         args: --release
@@ -91,7 +90,6 @@ jobs:
     - name: Build wheel
       uses: PyO3/maturin-action@v1
       with:
-        python-interpreter: ${{ steps.setup_python.outputs.python-path }}
         target: x86_64
         command: build
         args: --release

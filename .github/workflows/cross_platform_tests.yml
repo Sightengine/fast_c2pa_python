@@ -134,6 +134,7 @@ jobs:
     name: Publish Python distributions to PyPI
     needs: collect_wheels
     runs-on: ubuntu-latest
+    environment: pypi  
     # Trigger on tags (releases) OR manual workflow dispatch
     if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     permissions:

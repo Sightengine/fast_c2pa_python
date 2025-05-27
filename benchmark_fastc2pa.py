@@ -1,7 +1,7 @@
 import time
 import statistics
 import json
-import fast_c2pa_reader
+import fast_c2pa_python
 
 def benchmark_c2pa_read(image_path, iterations=200):
     print(f"\nRunning FAST C2PA reading benchmark over {iterations} iterations...")
@@ -12,7 +12,7 @@ def benchmark_c2pa_read(image_path, iterations=200):
         data = f.read()
     print(f"File read complete. Size: {len(data)} bytes")
     
-    result = fast_c2pa_reader.read_c2pa_from_bytes(data, "image/jpeg", allow_threads=True)
+    result = fast_c2pa_python.read_c2pa_from_bytes(data, "image/jpeg", allow_threads=True)
     if result:
         print("\nC2PA Data Found (full data):")
         print(f"  Title: {result.get('title')}")
@@ -31,7 +31,7 @@ def benchmark_c2pa_read(image_path, iterations=200):
     times_full = []
     for i in range(iterations):
         start_time = time.perf_counter()
-        fast_c2pa_reader.read_c2pa_from_bytes(data, "image/jpeg", allow_threads=True)
+        fast_c2pa_python.read_c2pa_from_bytes(data, "image/jpeg", allow_threads=True)
         duration = (time.perf_counter() - start_time) * 1000  # Convert to milliseconds
         times_full.append(duration)
         print(f"Iteration {i + 1}: {duration:.3f}ms")

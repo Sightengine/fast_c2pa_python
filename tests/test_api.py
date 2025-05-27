@@ -1,5 +1,5 @@
 """
-API compatibility tests for fast_c2pa_reader.
+API compatibility tests for fast_c2pa_python.
 
 These tests verify that our implementation correctly reads C2PA metadata
 and maintains compatibility with expected output formats.
@@ -12,7 +12,7 @@ import mimetypes
 from pathlib import Path
 
 # Import the implementation
-from fast_c2pa_reader import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
+from fast_c2pa_python import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
 
 # Test image path - update this to point to a test image with C2PA metadata
 TEST_IMAGES_DIR = Path(__file__).parent / "test_images"

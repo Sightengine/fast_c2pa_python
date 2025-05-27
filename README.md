@@ -1,4 +1,4 @@
-# fast_c2pa_reader
+# fast-c2pa-python
 
 A high-performance Python library for reading C2PA metadata.
 
@@ -14,13 +14,13 @@ This library provides extremely fast C2PA metadata extraction from digital asset
 | -------------- | ---------------- |
 | c2pa-python (UniFFI) | ~486ms |
 | numbers-c2pa | ~17ms |
-| fast_c2pa_reader (PyO3) | ~8ms |
+| fast-c2pa-python (PyO3) | ~8ms |
 | Native Rust | ~7ms |
 
 ## Installation
 
 ```bash
-pip install fast-c2pa-reader
+pip install fast-c2pa-python
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ pip install fast-c2pa-reader
 ### Basic Usage
 
 ```python
-from fast_c2pa_reader import read_c2pa_from_file
+from fast_c2pa_python import read_c2pa_from_file
 
 # Read C2PA metadata from a file (with automatic MIME type detection)
 metadata = read_c2pa_from_file("path/to/image.jpg")
@@ -41,7 +41,7 @@ metadata = read_c2pa_from_file("path/to/image.jpg", "image/jpeg")
 ### Reading from Binary Data
 
 ```python
-from fast_c2pa_reader import read_c2pa_from_bytes
+from fast_c2pa_python import read_c2pa_from_bytes
 
 # From HTTP response or other binary source
 response = requests.get("https://example.com/image.jpg")
@@ -115,7 +115,7 @@ maturin build --release
 Wheel files are generated in the `target/wheels/` directory and can be shared directly with users who can install them using pip:
 
 ```bash
-pip install /path/to/fast_c2pa_reader-x.x.x-cp3xx-cp3xx-platform.whl
+pip install /path/to/fast_c2pa_python-x.x.x-cp3xx-cp3xx-platform.whl
 ```
 
 ## License

@@ -8,7 +8,7 @@ use std::io::Cursor;
 /// This module provides high-performance functions for reading Content Authenticity
 /// Initiative (CAI) C2PA metadata from media files.
 #[pymodule]
-fn fast_c2pa_reader(_py: Python, m: &PyModule) -> PyResult<()> {
+fn fast_c2pa_python(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(read_c2pa_from_bytes, m)?)?;
     m.add_function(wrap_pyfunction!(read_c2pa_from_file, m)?)?;
     m.add_function(wrap_pyfunction!(get_mime_type, m)?)?;

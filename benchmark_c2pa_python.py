@@ -60,6 +60,6 @@ def benchmark_c2pa_python(image_path, iterations=200):
     print(f"  Max time: {max_time_full:.3f}ms")
     
 if __name__ == "__main__":
-    # Use the same test image as in the fast_c2pa_reader benchmark
+    # Use the same test image as in the fast_c2pa_python benchmark
     image_path = "./tests/test_images/adobe_firefly_image.jpg"
     benchmark_c2pa_python(image_path, 10) 

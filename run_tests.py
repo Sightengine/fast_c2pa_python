@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Test runner for fast_c2pa_reader.
+Test runner for fast_c2pa_python.
 
 This script runs both API compatibility tests and performance benchmarks.
 """
@@ -12,8 +12,8 @@ import argparse
 from pathlib import Path
 
 def main():
-    """Run tests for fast_c2pa_reader."""
-    parser = argparse.ArgumentParser(description="Run tests for fast_c2pa_reader")
+    """Run tests for fast_c2pa_python."""
+    parser = argparse.ArgumentParser(description="Run tests for fast_c2pa_python")
     parser.add_argument("--api-only", action="store_true", help="Run only API tests")
     parser.add_argument("--perf-only", action="store_true", help="Run only performance tests")
     parser.add_argument("--image", type=str, help="Path to test image with C2PA metadata")

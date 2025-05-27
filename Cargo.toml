@@ -1,10 +1,10 @@
 [package]
-name = "fast_c2pa_reader"
+name = "fast-c2pa-python"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "fast_c2pa_reader"
+name = "fast_c2pa_python"
 crate-type = ["cdylib"]
 
 [dependencies]

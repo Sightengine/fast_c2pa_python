@@ -1,5 +1,5 @@
 """
-Performance benchmark tests for fast_c2pa_reader.
+Performance benchmark tests for fast_c2pa_python.
 
 These tests verify that our implementation is at least 30x faster than c2pa-python,
 focusing on relative performance rather than absolute time measurements.
@@ -14,7 +14,7 @@ import mimetypes
 from pathlib import Path
 from io import BytesIO
 
-from fast_c2pa_reader import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
+from fast_c2pa_python import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
 
 # Import c2pa-python for comparison
 from c2pa import Reader
@@ -61,7 +61,7 @@ def setup_test_image_bytes():
     return image_bytes, get_mime_type(TEST_IMAGE)
 
 def test_compare_performance(setup_test_image_bytes):
-    """Test performance of fast_c2pa_reader vs c2pa-python."""
+    """Test performance of fast_c2pa_python vs c2pa-python."""
     settings = get_performance_settings()
     if settings["skip_tests"]:
         pytest.skip("Performance tests skipped via environment variable")
@@ -71,7 +71,7 @@ def test_compare_performance(setup_test_image_bytes):
     if not mime_type:
         pytest.skip(f"Could not determine MIME type for {TEST_IMAGE}")
     
-    # Test fast_c2pa_reader performance
+    # Test fast_c2pa_python performance
     fast_c2pa_times = []
     for _ in range(ITERATIONS):
         start_time = time.time()
@@ -98,7 +98,7 @@ def test_compare_performance(setup_test_image_bytes):
     speedup = c2pa_python_avg / fast_c2pa_avg
     
     print(f"\nPerformance comparison results:")
-    print(f"  fast_c2pa_reader average time: {fast_c2pa_avg:.2f}ms")
+    print(f"  fast_c2pa_python average time: {fast_c2pa_avg:.2f}ms")
     print(f"  c2pa-python average time: {c2pa_python_avg:.2f}ms")
     print(f"  Speedup factor: {speedup:.2f}x")
     print(f"  Required minimum speedup: {settings['speedup_factor']}x")
@@ -107,6 +107,6 @@ def test_compare_performance(setup_test_image_bytes):
     
     # Check if our library is at least N times faster
     assert speedup >= settings["speedup_factor"], (
-        f"fast_c2pa_reader is only {speedup:.2f}x faster than c2pa-python, "
+        f"fast_c2pa_python is only {speedup:.2f}x faster than c2pa-python, "
         f"but at least {settings['speedup_factor']}x speedup is required"
     )

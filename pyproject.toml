@@ -3,7 +3,7 @@ requires = ["maturin>=1.8.3"]
 build-backend = "maturin"
 
 [project]
-name = "fast_c2pa_reader"
+name = "fast-c2pa-python"
 version = "0.1.0"
 requires-python = ">=3.10"
 classifiers = [

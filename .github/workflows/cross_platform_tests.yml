@@ -154,6 +154,8 @@ jobs:
         ls -la dist/
         echo "Checking for .whl files specifically:"
         find dist -name "*.whl" -type f
+        echo "Wheel file details:"
+        find dist -name "*.whl" -type f -exec basename {} \;
         
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1

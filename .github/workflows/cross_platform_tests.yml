@@ -2,7 +2,7 @@ name: Cross-Platform Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, test-pypi-publish ]
     tags:
       - 'v*.*.*' # Also trigger on tags like v1.0.0, v1.2.3
   pull_request:

@@ -131,6 +131,8 @@ jobs:
     runs-on: ubuntu-latest
     # Trigger on test-pypi-publish branch OR manual workflow dispatch
     if: github.ref == 'refs/heads/test-pypi-publish' || github.event_name == 'workflow_dispatch'
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
     - name: Download all wheels
@@ -147,6 +149,4 @@ jobs:
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository_url: https://test.pypi.org/legacy/
-        username: __token__
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }} 
+        repository_url: https://test.pypi.org/legacy/ 

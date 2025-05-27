@@ -129,10 +129,8 @@ jobs:
     name: Publish Python distributions to TestPyPI
     needs: collect_wheels
     runs-on: ubuntu-latest
-    # Trigger on a specific branch for testing TestPyPI publish
-    if: github.ref == 'refs/heads/test-pypi-publish'
-    permissions:
-      id-token: write # Re-enable for trusted publishing
+    # Trigger on test-pypi-publish branch OR manual workflow dispatch
+    if: github.ref == 'refs/heads/test-pypi-publish' || github.event_name == 'workflow_dispatch'
 
     steps:
     - name: Download all wheels
@@ -141,9 +139,14 @@ jobs:
         name: all-wheels
         path: dist/
 
+    - name: List downloaded files
+      run: |
+        echo "Files in dist/:"
+        ls -la dist/
+        
     - name: Publish to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository_url: https://test.pypi.org/legacy/
-        # username: __token__ # No longer needed
-        # password: ${{ secrets.TEST_PYPI_API_TOKEN }} # No longer needed 
+        username: __token__
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }} 

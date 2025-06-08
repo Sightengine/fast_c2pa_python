@@ -41,3 +41,6 @@ wheels/
 .venv
 venv/
 ENV/ 
+
+# Cursor rules
+.cursorrules

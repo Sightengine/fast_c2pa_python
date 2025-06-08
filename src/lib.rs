@@ -1,4 +1,4 @@
-//TODO: Add Makefile
+//TODO: Check better way to handle mime
 
 use pyo3::prelude::*;
 mod mime_utils;

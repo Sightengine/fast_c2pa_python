@@ -66,11 +66,11 @@ def test_mime_type_handling(setup_test_image_bytes):
         # Or it raises an exception, which is also acceptable
         pass
 
-def test_error_handling_invalid_bytes():
+def test_no_jumbf_data():
     """Test error handling with invalid data."""
-    # Test with invalid bytes
-    with pytest.raises(Exception):
-        read_c2pa_from_bytes(b"invalid data", "image/jpeg")
+    # Test with invalid bytes - should return None instead of raising exception
+    result = read_c2pa_from_bytes(b"no jumbf data", "image/jpeg")
+    assert result is None
 
 def test_error_handling_no_c2pa():
     """Test with data that has no C2PA metadata."""

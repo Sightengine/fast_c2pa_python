@@ -1,4 +1,5 @@
-use c2pa::Reader;
+use c2pa::{Reader, jumbf_io::load_jumbf_from_stream};
+use log::debug;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use std::io::Cursor;
@@ -81,6 +82,19 @@ fn get_mime_type(py: Python, file_path: &str) -> PyResult<Option<String>> {
 #[pyfunction]
 #[pyo3(signature = (data, mime_type, allow_threads=true))]
 fn read_c2pa_from_bytes(py: Python, data: &[u8], mime_type: &str, allow_threads: bool) -> PyResult<Option<PyObject>> {
+    // First check if JUMBF data exists before trying to create a Reader
+    let has_jumbf = {
+        let mut cursor = Cursor::new(data);
+        load_jumbf_from_stream(mime_type, &mut cursor).is_ok()
+    };
+
+    if !has_jumbf {
+        // No JUMBF data found
+        debug!("No JUMBF data found in the provided data");
+        return Ok(None);
+    }
+
+    // JUMBF data exists, proceed with Reader creation
     let reader = if allow_threads {
         let cursor = Cursor::new(data);
         py.allow_threads(|| Reader::from_stream(mime_type, cursor))
@@ -88,6 +102,7 @@ fn read_c2pa_from_bytes(py: Python, data: &[u8], mime_type: &str, allow_threads:
         let cursor = Cursor::new(data);
         Reader::from_stream(mime_type, cursor)
     };
+    
     match reader {
         Ok(reader) => {
             // Get the active manifest
@@ -106,14 +121,7 @@ fn read_c2pa_from_bytes(py: Python, data: &[u8], mime_type: &str, allow_threads:
             }
         },
         Err(e) => {
-            // Ok if Error is missing JUMBF data
-            if e.to_string().contains("no JUMBF data found") {
-                // TODO: rely on error message is fragile
-                Ok(None)
-            } else {
-                // Error reading C2PA data
-                Err(PyRuntimeError::new_err(format!("Error reading C2PA data: {}", e)))
-            }
+            Err(PyRuntimeError::new_err(format!("Error reading C2PA data: {}", e)))
         }
     }
 }

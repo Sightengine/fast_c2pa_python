@@ -24,13 +24,12 @@ use pyo3::exceptions::PyRuntimeError;
 /// Raises:
 ///     RuntimeError: If there is an error reading or parsing the C2PA data
 #[pyfunction]
-#[pyo3(signature = (data, mime_type, allow_threads=true, verify_trust=None))]
+#[pyo3(signature = (data, mime_type, allow_threads=true))]
 pub fn read_c2pa_from_bytes(
     py: Python,
     data: &[u8],
     mime_type: &str,
     allow_threads: bool,
-    verify_trust: Option<bool>
 ) -> PyResult<Option<PyObject>> {
     // First check if JUMBF data exists before trying to create a Reader
     let has_jumbf = {

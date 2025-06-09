@@ -1,10 +1,13 @@
 dev:
+	maturin develop
+
+dev-release:
 	maturin develop --release
 
 test: dev
 	python -m pytest tests/ -v
 
-test-perf: dev
+test-perf: dev-release
 	python -m pytest tests/test_performance.py -s -v
 
 test-api: dev

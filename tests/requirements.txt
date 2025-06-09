@@ -3,3 +3,4 @@ pytest-benchmark>=4.0.0
 statistics>=1.0.3.5
 c2pa-python==0.8.3
 cryptography==44.0.3
+pytest-order

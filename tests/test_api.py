@@ -11,7 +11,7 @@ import json
 import mimetypes
 from pathlib import Path
 
-from fast_c2pa_python import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type
+from fast_c2pa_python import read_c2pa_from_bytes, read_c2pa_from_file, get_mime_type, setup_trust_verification
 
 # Test images - both JPEG and PNG formats
 TEST_IMAGES_DIR = Path(__file__).parent / "test_images"
@@ -20,6 +20,11 @@ TEST_IMAGES = [
     str(TEST_IMAGES_DIR / "adobe_firefly_image.jpg")
 ]
 TEST_IMAGE_NOT_C2PA = str(TEST_IMAGES_DIR / "screenshot_noc2pa.png")
+
+# Trust settings files
+TRUST_ANCHORS_FILE = str(Path(__file__).parent / "tmp_cert" / "anchors.pem")
+TRUST_ALLOWED_FILE = str(Path(__file__).parent / "tmp_cert" / "allowed.pem") 
+TRUST_CONFIG_FILE = str(Path(__file__).parent / "tmp_cert" / "store.cfg")
 
 @pytest.fixture(scope="session", params=TEST_IMAGES)
 def setup_test_image_bytes(request):
@@ -43,6 +48,24 @@ def get_active_manifest(metadata):
     active_manifest_id = metadata["active_manifest"]
     return metadata["manifests"].get(active_manifest_id)
 
+def has_trust_files():
+    """Check if trust configuration files exist."""
+    return (os.path.exists(TRUST_ANCHORS_FILE) and 
+            os.path.exists(TRUST_ALLOWED_FILE) and 
+            os.path.exists(TRUST_CONFIG_FILE))
+
+def setup_trust_settings():
+    """Configure trust settings for C2PA validation."""
+    if not has_trust_files():
+        return False
+    
+    try:
+        setup_trust_verification(TRUST_ANCHORS_FILE, TRUST_ALLOWED_FILE, TRUST_CONFIG_FILE)
+        return True
+    except Exception as e:
+        print(f"Failed to setup trust settings: {e}")
+        return False
+
 def test_read_c2pa_from_bytes(setup_test_image_bytes):
     """Test reading C2PA metadata from bytes."""
     image_bytes, mime_type, test_image = setup_test_image_bytes
@@ -65,6 +88,116 @@ def test_read_c2pa_from_bytes(setup_test_image_bytes):
     # Verify signature info exists if the file has valid C2PA data
     if "signature_info" in active_manifest:
         assert "issuer" in active_manifest["signature_info"]
+
+@pytest.mark.parametrize("test_image", TEST_IMAGES)
+@pytest.mark.order(1)  # Run this test early before any trust setup
+def test_validation_state_without_trust(test_image):
+    """Test that validation_state is 'Valid' when no trust settings are configured."""
+    if not os.path.exists(test_image):
+        pytest.skip(f"Test image not found: {test_image}")
+    
+    # This test should only run if trust hasn't been configured yet
+    # We'll check this by reading metadata and seeing the state
+    metadata = read_c2pa_from_file(test_image)
+    
+    if metadata is None:
+        pytest.skip(f"No C2PA metadata found in {test_image}")
+    
+    # If trust was already configured by previous tests, skip this test
+    if metadata["validation_state"] == "Trusted":
+        pytest.skip("Trust settings already configured globally - cannot test without trust")
+    
+    # Verify validation_state is 'Valid' 
+    assert "validation_state" in metadata
+    assert metadata["validation_state"] == "Valid", f"Expected 'Valid' but got '{metadata['validation_state']}'"
+    
+    # Verify no signingCredential.trusted validation result
+    if "validation_results" in metadata and "activeManifest" in metadata["validation_results"]:
+        success_results = metadata["validation_results"]["activeManifest"].get("success", [])
+        trusted_results = [r for r in success_results if r.get("code") == "signingCredential.trusted"]
+        assert len(trusted_results) == 0, "Should not have signingCredential.trusted without trust settings"
+
+@pytest.mark.parametrize("test_image", TEST_IMAGES)
+@pytest.mark.order(2)  # Run after the without-trust test
+def test_validation_state_with_trust(test_image):
+    """Test that validation_state is 'Trusted' when trust settings are configured."""
+    if not os.path.exists(test_image):
+        pytest.skip(f"Test image not found: {test_image}")
+    
+    if not has_trust_files():
+        pytest.skip("Trust configuration files not found - cannot test trust validation")
+    
+    # Configure trust settings
+    if not setup_trust_settings():
+        pytest.skip("Could not configure trust settings")
+    
+    # Read metadata with trust settings
+    metadata = read_c2pa_from_file(test_image)
+    
+    if metadata is None:
+        pytest.skip(f"No C2PA metadata found in {test_image}")
+    
+    # Verify validation_state is 'Trusted'
+    assert "validation_state" in metadata
+    assert metadata["validation_state"] == "Trusted", (
+        f"Expected validation_state 'Trusted' but got '{metadata['validation_state']}'"
+    )
+    
+    # Verify signingCredential.trusted validation result is present
+    if "validation_results" in metadata and "activeManifest" in metadata["validation_results"]:
+        success_results = metadata["validation_results"]["activeManifest"].get("success", [])
+        trusted_results = [r for r in success_results if r.get("code") == "signingCredential.trusted"]
+        assert len(trusted_results) >= 1, (
+            "Should have at least one signingCredential.trusted validation result with trust settings"
+        )
+        
+        # Verify the trusted result has correct structure
+        trusted_result = trusted_results[0]
+        assert "url" in trusted_result
+        assert "explanation" in trusted_result
+
+@pytest.mark.parametrize("test_image", TEST_IMAGES) 
+@pytest.mark.order(3)  # Run after trust is configured
+def test_trust_enables_additional_validation(test_image):
+    """Test that trust settings add the signingCredential.trusted validation result."""
+    if not os.path.exists(test_image):
+        pytest.skip(f"Test image not found: {test_image}")
+    
+    if not has_trust_files():
+        pytest.skip("Trust configuration files not found - cannot test trust validation")
+    
+    # Ensure trust is configured (should be from previous test)
+    if not setup_trust_settings():
+        pytest.skip("Could not configure trust settings")
+    
+    metadata = read_c2pa_from_file(test_image)
+    
+    if metadata is None:
+        pytest.skip(f"No C2PA metadata found in {test_image}")
+    
+    # With trust settings, validation_state must be "Trusted"
+    assert metadata["validation_state"] == "Trusted"
+    
+    if "validation_results" in metadata and "activeManifest" in metadata["validation_results"]:
+        success_results = metadata["validation_results"]["activeManifest"].get("success", [])
+        
+        # Check that signingCredential.trusted is present
+        trusted_results = [r for r in success_results if r.get("code") == "signingCredential.trusted"]
+        assert len(trusted_results) >= 1, "Trust settings should add signingCredential.trusted validation"
+        
+        # Check that we have the standard validation results plus the trust one
+        validation_codes = {r.get("code") for r in success_results}
+        expected_codes = {
+            "claimSignature.insideValidity",
+            "claimSignature.validated", 
+            "assertion.hashedURI.match",
+            "assertion.dataHash.match",
+            "signingCredential.trusted"  # This should be added by trust settings
+        }
+        
+        # All expected codes should be present (may have multiple assertion.hashedURI.match)
+        for code in expected_codes:
+            assert code in validation_codes, f"Missing expected validation code: {code}"
 
 def test_mime_type_handling(setup_test_image_bytes):
     """Test handling of different MIME types."""

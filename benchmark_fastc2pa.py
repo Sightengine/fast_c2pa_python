@@ -1,7 +1,28 @@
 import time
 import statistics
 import json
+from pathlib import Path
 import fast_c2pa_python
+from fast_c2pa_python import setup_trust_verification
+
+def setup_trust_if_available():
+    """Setup trust verification if config files are available."""
+    trust_dir = Path("./tests/tmp_cert")
+    anchors_file = trust_dir / "anchors.pem" 
+    allowed_file = trust_dir / "allowed.pem"
+    config_file = trust_dir / "store.cfg"
+    
+    if all(f.exists() for f in [anchors_file, allowed_file, config_file]):
+        try:
+            setup_trust_verification(str(anchors_file), str(allowed_file), str(config_file))
+            print("Trust verification enabled")
+            return True
+        except Exception as e:
+            print(f"Failed to setup trust: {e}")
+            return False
+    else:
+        print("Trust files not found, running without trust verification")
+        return False
 
 def benchmark_c2pa_read(image_path, iterations=200):
     print(f"\nRunning FAST C2PA reading benchmark over {iterations} iterations...")
@@ -49,6 +70,9 @@ def benchmark_c2pa_read(image_path, iterations=200):
     print(f"  Max time: {max_time_full:.3f}ms")
     
 if __name__ == "__main__":
+    # Setup trust verification if available
+    setup_trust_if_available()
+    
     # Replace with your image path
     image_path = "./tests/test_images/adobe_firefly_image.jpg"
     benchmark_c2pa_read(image_path) 

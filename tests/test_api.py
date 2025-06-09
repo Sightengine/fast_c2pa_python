@@ -36,6 +36,13 @@ def setup_test_image_bytes(request):
     
     return image_bytes, get_mime_type(test_image), test_image
 
+def get_active_manifest(metadata):
+    """Helper function to get the active manifest from c2pa structure."""
+    if not metadata or "active_manifest" not in metadata or "manifests" not in metadata:
+        return None
+    active_manifest_id = metadata["active_manifest"]
+    return metadata["manifests"].get(active_manifest_id)
+
 def test_read_c2pa_from_bytes(setup_test_image_bytes):
     """Test reading C2PA metadata from bytes."""
     image_bytes, mime_type, test_image = setup_test_image_bytes
@@ -45,13 +52,19 @@ def test_read_c2pa_from_bytes(setup_test_image_bytes):
     # Read metadata from bytes
     metadata = read_c2pa_from_bytes(image_bytes, mime_type)
     
-    # Basic validation
+    # Basic validation - check c2pa structure
     assert metadata is not None
-    assert "title" in metadata or "generator" in metadata or "claim_generator" in metadata
+    assert "active_manifest" in metadata
+    assert "manifests" in metadata
+    
+    # Get active manifest
+    active_manifest = get_active_manifest(metadata)
+    assert active_manifest is not None
+    assert "title" in active_manifest or "generator" in active_manifest or "claim_generator" in active_manifest
     
     # Verify signature info exists if the file has valid C2PA data
-    if "signature_info" in metadata:
-        assert "issuer" in metadata["signature_info"]
+    if "signature_info" in active_manifest:
+        assert "issuer" in active_manifest["signature_info"]
 
 def test_mime_type_handling(setup_test_image_bytes):
     """Test handling of different MIME types."""
@@ -140,13 +153,19 @@ def test_read_c2pa_from_file_with_explicit_mime(test_image):
     # Read metadata with explicit MIME type
     metadata = read_c2pa_from_file(test_image, mime_type)
     
-    # Basic validation
+    # Basic validation - check c2pa structure
     assert metadata is not None
-    assert "title" in metadata or "generator" in metadata or "claim_generator" in metadata
+    assert "active_manifest" in metadata
+    assert "manifests" in metadata
+    
+    # Get active manifest
+    active_manifest = get_active_manifest(metadata)
+    assert active_manifest is not None
+    assert "title" in active_manifest or "generator" in active_manifest or "claim_generator" in active_manifest
     
     # Verify signature info exists if the file has valid C2PA data
-    if "signature_info" in metadata:
-        assert "issuer" in metadata["signature_info"]
+    if "signature_info" in active_manifest:
+        assert "issuer" in active_manifest["signature_info"]
 
 @pytest.mark.parametrize("test_image", TEST_IMAGES)
 def test_read_c2pa_from_file_with_auto_mime(test_image):
@@ -160,13 +179,19 @@ def test_read_c2pa_from_file_with_auto_mime(test_image):
     # Read metadata with automatic MIME type detection
     metadata = read_c2pa_from_file(test_image)
     
-    # Basic validation
+    # Basic validation - check c2pa structure
     assert metadata is not None
-    assert "title" in metadata or "generator" in metadata or "claim_generator" in metadata
+    assert "active_manifest" in metadata
+    assert "manifests" in metadata
+    
+    # Get active manifest
+    active_manifest = get_active_manifest(metadata)
+    assert active_manifest is not None
+    assert "title" in active_manifest or "generator" in active_manifest or "claim_generator" in active_manifest
     
     # Verify signature info exists if the file has valid C2PA data
-    if "signature_info" in metadata:
-        assert "issuer" in metadata["signature_info"]
+    if "signature_info" in active_manifest:
+        assert "issuer" in active_manifest["signature_info"]
 
 def test_read_c2pa_from_file_no_c2pa():
     """Test with file that has no C2PA metadata."""

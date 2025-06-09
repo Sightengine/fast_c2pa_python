@@ -46,4 +46,3 @@ def setup_trust_verification(anchors_path, allowed_path, config_path):
     """Setup global C2PA trust settings"""
     settings = build_trust_settings_from_files(anchors_path, allowed_path, config_path)
     load_c2pa_settings(settings)
-

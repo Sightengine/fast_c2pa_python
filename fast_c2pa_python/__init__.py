@@ -1,9 +1,9 @@
 import mimetypes
-from fast_c2pa_core import read_c2pa_from_bytes, load_c2pa_settings
+from fast_c2pa_core import read_c2pa_from_bytes, load_c2pa_settings, convert_to_gray_keep_c2pa
 import json
 from pathlib import Path
 
-__all__ = ["read_c2pa_from_file", "read_c2pa_from_bytes", "get_mime_type", "setup_trust_verification"]
+__all__ = ["read_c2pa_from_file", "read_c2pa_from_bytes", "get_mime_type", "setup_trust_verification", "convert_to_gray_keep_c2pa"]
 
 def get_mime_type(file_path):
     """Get MIME type of file"""

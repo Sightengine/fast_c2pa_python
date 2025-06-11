@@ -972,7 +972,7 @@ checksum = "a48fe53466ab1f4ea6303bf9d7a0ca8060778590f09fd6c3304cc817aeb9935d"
 
 [[package]]
 name = "fast-c2pa-python"
-version = "0.1.4"
+version = "0.1.6"
 dependencies = [
  "c2pa",
  "image",

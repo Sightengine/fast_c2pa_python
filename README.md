@@ -14,7 +14,7 @@ This library provides fast C2PA metadata extraction from digital assets using di
 | -------------- | ---------------- |
 | c2pa-python (UniFFI) v8 | ~486ms |
 | numbers-c2pa | ~17ms |
-| fast-c2pa-python (PyO3) | ~8ms |
+| fast-c2pa-python (PyO3) | ~18ms |
 | Native Rust | ~7ms |
 
 ## Installation

@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fast-c2pa-python"
-version = "0.1.4"
+version = "0.1.5"
 description = "Fast Python library for reading C2PA metadata using PyO3 bindings to c2pa-rs"
 authors = [{name = "Sightengine", email = "info@sightengine.com"}]
 license = {text = "MIT OR Apache-2.0"}

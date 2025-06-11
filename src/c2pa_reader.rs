@@ -58,7 +58,7 @@ pub fn read_c2pa_from_bytes(
             let json_module = PyModule::import(py, "json")?;
             let py_json = json_module.getattr("loads")?.call1((json_str,))?;
             
-            Ok(Some(py_json.to_object(py)))
+            Ok(Some(py_json.into_py(py)))
         },
         Err(e) => {
             Err(PyRuntimeError::new_err(format!("Error reading C2PA data: {}", e)))

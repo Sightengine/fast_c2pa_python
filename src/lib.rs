@@ -26,7 +26,7 @@ pub fn load_c2pa_settings(settings_json: &str) -> PyResult<()> {
 /// This module provides high-performance functions for reading Content Authenticity
 /// Initiative (CAI) C2PA metadata from media files.
 #[pymodule]
-fn fast_c2pa_core(_py: Python, m: &PyModule) -> PyResult<()> {
+fn fast_c2pa_core(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(read_c2pa_from_bytes, m)?)?;
     m.add_function(wrap_pyfunction!(load_c2pa_settings, m)?)?; 
     m.add_function(wrap_pyfunction!(convert_to_gray_keep_c2pa, m)?)?; 

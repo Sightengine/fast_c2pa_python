@@ -73,7 +73,7 @@ with open("path/to/image.jpg", "rb") as f:
 
 ## Testing
 
-The library includes both API compatibility tests and performance benchmarks to ensure functionality and speed.
+The library includes API compatibility tests to ensure functionality.
 
 ### Running Tests
 
@@ -83,10 +83,10 @@ Install test dependencies:
 pip install -r tests/requirements.txt
 ```
 
-Run all tests:
+Run API tests:
 
 ```bash
-python run_tests.py 
+python run_tests.py --api-only
 ```
 
 ## Development

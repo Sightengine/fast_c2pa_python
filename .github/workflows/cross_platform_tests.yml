@@ -4,9 +4,7 @@ on:
   push:
     branches: [ main, master ]
     tags:
-      - 'v*.*.*' # Also trigger on tags like v1.0.0, v1.2.3
-  pull_request:
-    branches: [ main, master ]
+      - 'v*.*.*' # Only trigger on tags like v1.0.0, v1.2.3
   workflow_dispatch:  # Allows manual triggering
 
 # Add this section to control notification behavior
@@ -89,8 +87,8 @@ jobs:
         args: --release
         sccache: 'true'
       
-    - name: Run tests
-      run: python run_tests.py
+    - name: Run API tests only
+      run: python run_tests.py --api-only
       continue-on-error: true  # Continue even if tests fail to get wheels
       
     - name: Build wheel

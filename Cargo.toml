@@ -2,6 +2,10 @@
 name = "fast-c2pa-python"
 version = "0.1.0"
 edition = "2021"
+authors = ["Sightengine <info@sightengine.com>"]
+license = "MIT OR Apache-2.0"
+description = "Fast Python library for reading C2PA metadata using PyO3 bindings to c2pa-rs"
+keywords = ["c2pa", "metadata", "python", "bindings"]
 
 [lib]
 name = "fast_c2pa_core"

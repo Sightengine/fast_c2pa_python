@@ -1,10 +1,10 @@
-# fast_c2pa_reader
+# fast-c2pa-python
 
-A high-performance Python library for reading C2PA metadata.
+A Python library for reading C2PA metadata based on c2pa-rs
 
 ## Overview
 
-This library provides extremely fast C2PA metadata extraction from digital assets using direct PyO3 bindings to the Rust C2PA implementation. It was created to address performance bottlenecks in existing Python C2PA libraries.
+This library provides fast C2PA metadata extraction from digital assets using direct PyO3 bindings to the Rust C2PA implementation. It was created to address performance bottlenecks in existing Python C2PA libraries.
 
 > **Note:** This library is designed for reading C2PA metadata only. It does not support writing or creating C2PA metadata at this time.
 
@@ -12,15 +12,15 @@ This library provides extremely fast C2PA metadata extraction from digital asset
 
 | Implementation | Average Read Time |
 | -------------- | ---------------- |
-| c2pa-python (UniFFI) | ~486ms |
+| c2pa-python (UniFFI) v8 | ~486ms |
 | numbers-c2pa | ~17ms |
-| fast_c2pa_reader (PyO3) | ~8ms |
+| fast-c2pa-python (PyO3) | ~8ms |
 | Native Rust | ~7ms |
 
 ## Installation
 
 ```bash
-pip install fast-c2pa-reader
+pip install fast-c2pa-python
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ pip install fast-c2pa-reader
 ### Basic Usage
 
 ```python
-from fast_c2pa_reader import read_c2pa_from_file
+from fast_c2pa_python import read_c2pa_from_file
 
 # Read C2PA metadata from a file (with automatic MIME type detection)
 metadata = read_c2pa_from_file("path/to/image.jpg")
@@ -41,7 +41,7 @@ metadata = read_c2pa_from_file("path/to/image.jpg", "image/jpeg")
 ### Reading from Binary Data
 
 ```python
-from fast_c2pa_reader import read_c2pa_from_bytes
+from fast_c2pa_python import read_c2pa_from_bytes
 
 # From HTTP response or other binary source
 response = requests.get("https://example.com/image.jpg")
@@ -73,7 +73,7 @@ with open("path/to/image.jpg", "rb") as f:
 
 ## Testing
 
-The library includes both API compatibility tests and performance benchmarks to ensure functionality and speed.
+The library includes API compatibility tests to ensure functionality.
 
 ### Running Tests
 
@@ -83,10 +83,10 @@ Install test dependencies:
 pip install -r tests/requirements.txt
 ```
 
-Run all tests:
+Run API tests:
 
 ```bash
-python run_tests.py 
+python run_tests.py --api-only
 ```
 
 ## Development
@@ -115,9 +115,21 @@ maturin build --release
 Wheel files are generated in the `target/wheels/` directory and can be shared directly with users who can install them using pip:
 
 ```bash
-pip install /path/to/fast_c2pa_reader-x.x.x-cp3xx-cp3xx-platform.whl
+pip install /path/to/fast_c2pa_python-x.x.x-cp3xx-cp3xx-platform.whl
 ```
 
 ## License
 
-MIT 
+This project is dual-licensed under both MIT and Apache 2.0 licenses to ensure compatibility with the underlying c2pa-rs library.
+
+## Attribution
+
+This library is built upon the excellent work of the [c2pa-rs](https://github.com/contentauth/c2pa-rs) library by the Content Authenticity Initiative. The c2pa-rs library provides the core C2PA implementation in Rust, and this project creates Python bindings using PyO3 for improved performance.
+
+**Developed by:** [Sightengine](https://sightengine.com) - AI-powered content moderation
+
+**Key Dependencies:**
+- [c2pa-rs](https://github.com/contentauth/c2pa-rs) - Core C2PA implementation
+- [PyO3](https://github.com/PyO3/pyo3) - Rust bindings for Python
+
+Special thanks to the Content Authenticity Initiative and the c2pa-rs contributors for their foundational work on C2PA standards and implementation.

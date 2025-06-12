@@ -70,6 +70,48 @@ with open("path/to/image.jpg", "rb") as f:
 }
 ```
 
+## Trust Settings and Certificates
+
+### Adding Trust Settings
+
+To properly verify C2PA signatures, you may need to configure trust settings for specific certificate authorities or individual certificates. The Content Authenticity Initiative maintains a list of known certificates that can be used for verification.
+
+```python
+from fast_c2pa_python import setup_trust_verification, read_c2pa_from_file
+
+# Configure trust settings using certificate files
+setup_trust_verification(
+    anchors_file="path/to/anchors.pem",       # Root CA certificates
+    allowed_file="path/to/allowed.pem",      # Allowed intermediate certificates  
+    config_file="path/to/store.cfg"          # Trust store configuration
+)
+
+# After configuring trust, read C2PA metadata
+# The validation_state will be "Trusted" instead of just "Valid"
+metadata = read_c2pa_from_file("path/to/image.jpg")
+print(f"Validation state: {metadata['validation_state']}")
+```
+
+### Validation States
+
+Without trust configuration:
+```python
+metadata = read_c2pa_from_file("image.jpg")
+print(metadata['validation_state'])  # "Valid" - signature verified but not trusted
+```
+
+With trust configuration:
+```python
+setup_trust_verification("anchors.pem", "allowed.pem", "store.cfg")
+metadata = read_c2pa_from_file("image.jpg") 
+print(metadata['validation_state'])  # "Trusted" - signature verified and trusted
+```
+
+### Finding Certificates
+
+You can find trusted certificates and learn more about certificate verification at:
+- **CAI Known Certificate List**: https://opensource.contentauthenticity.org/docs/verify-known-cert-list/
+
 ## Testing
 
 The library includes API compatibility tests to ensure functionality.
@@ -103,18 +145,6 @@ maturin develop
 
 # Run in release mode for better performance
 maturin develop --release
-```
-
-### Building Wheel Files
-
-```bash
-# Build wheel for the current platform
-maturin build --release
-
-Wheel files are generated in the `target/wheels/` directory and can be shared directly with users who can install them using pip:
-
-```bash
-pip install /path/to/fast_c2pa_python-x.x.x-cp3xx-cp3xx-platform.whl
 ```
 
 ## License

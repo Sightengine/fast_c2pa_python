@@ -1,5 +1,8 @@
 # fast-c2pa-python
 
+[![PyPI version](https://badge.fury.io/py/fast-c2pa-python.svg)](https://badge.fury.io/py/fast-c2pa-python)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/fast-c2pa-python)](https://pypi.org/project/fast-c2pa-python/)
+
 A Python library for reading C2PA metadata based on c2pa-rs
 
 ## Overview

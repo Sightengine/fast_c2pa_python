@@ -11,11 +11,6 @@ license = {text = "MIT OR Apache-2.0"}
 readme = "README.md"
 keywords = ["c2pa", "metadata", "python", "bindings"]
 requires-python = ">=3.11"
-
-[project.urls]
-Homepage = "https://github.com/Sightengine/fast_c2pa_python"
-Repository = "https://github.com/Sightengine/fast_c2pa_python"
-Issues = "https://github.com/Sightengine/fast_c2pa_python/issues"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -27,6 +22,11 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Sightengine/fast_c2pa_python"
+Repository = "https://github.com/Sightengine/fast_c2pa_python"
+Issues = "https://github.com/Sightengine/fast_c2pa_python/issues"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

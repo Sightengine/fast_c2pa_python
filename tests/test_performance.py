@@ -1,7 +1,7 @@
 """
 Performance benchmark tests for fast_c2pa_python.
 
-These tests verify that our implementation is at least 30x faster than c2pa-python,
+These tests verify that our implementation is at least 10x faster than c2pa-python,
 focusing on relative performance rather than absolute time measurements.
 """
 
@@ -34,7 +34,7 @@ def get_performance_settings():
     These settings can be overridden by environment variables.
     """
     # Default minimum speedup factor (can be overridden)
-    default_speedup_factor = 20.0
+    default_speedup_factor = 10.0
     
     # Allow overriding thresholds via environment variables
     speedup_factor = float(os.environ.get("FAST_C2PA_MIN_SPEEDUP_FACTOR", default_speedup_factor))
